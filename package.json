@@ -9,13 +9,18 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+  "onCommand:wrapped.showStats",
+  "onStartupFinished"
+  ],
   "main": "./extension.js",
   "contributes": {
-    "commands": [{
-      "command": "vscode-wrapped.helloWorld",
-      "title": "Hello World"
-    }]
+    "commands": [
+      {"command": "vscode-wrapped.showStats",
+      "title": "showStats"},
+      {"command": "vscode-wrapped.reset",
+      "title": "resteStat"}
+    ]
   },
   "scripts": {
     "lint": "eslint .",

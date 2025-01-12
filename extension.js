@@ -1,36 +1,120 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 const vscode = require('vscode');
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
+let stats = {
+	keysPressed: 0,
+	filesCreated: 0,
+	filesDeleted: 0,
+	totalTime: 0, // Temps total depuis le dernier reset
+	startTime: Date.now(), // Début de la session actuelle
+};
 
-/**
- * @param {vscode.ExtensionContext} context
- */
-function activate(context) {
-
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "vscode-wrapped" is now active!');
-
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with  registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('vscode-wrapped.helloWorld', function () {
-		// The code you place here will be executed every time your command is executed
-
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from vscode-wrapped!');
+function saveStats(context) {
+	// Mettre à jour le temps total accumulé
+	stats.totalTime += Date.now() - stats.startTime;
+	// Sauvegarder dans globalState
+	context.globalState.update('vscodeWrappedStats', {
+		keysPressed: stats.keysPressed,
+		filesCreated: stats.filesCreated,
+		filesDeleted: stats.filesDeleted,
+		totalTime: stats.totalTime,
 	});
-
-	context.subscriptions.push(disposable);
 }
 
-// This method is called when your extension is deactivated
-function deactivate() {}
+function loadStats(context) {
+	const savedStats = context.globalState.get('vscodeWrappedStats');
+	if (savedStats) {
+		stats = { ...savedStats };
+		stats.startTime = Date.now(); // Réinitialiser le début de la session actuelle
+	} else {
+		stats = {
+			keysPressed: 0,
+			filesCreated: 0,
+			filesDeleted: 0,
+			totalTime: 0,
+			startTime: Date.now(),
+		};
+	}
+}
+
+function activate(context) {
+	loadStats(context);
+
+	// Listener pour les pressions de touches
+	const keyPressListener = vscode.workspace.onDidChangeTextDocument(() => {
+		stats.keysPressed++;
+		saveStats(context);
+	});
+
+	// Listener pour la création de fichiers
+	const fileCreateListener = vscode.workspace.onDidCreateFiles((event) => {
+		stats.filesCreated += event.files.length;
+		saveStats(context);
+	});
+
+	// Listener pour la suppression de fichiers
+	const fileDeleteListener = vscode.workspace.onDidDeleteFiles((event) => {
+		stats.filesDeleted += event.files.length;
+		saveStats(context);
+	});
+
+	// Commande pour afficher les statistiques
+	const showStats = vscode.commands.registerCommand('vscode-wrapped.showStats', function () {
+		saveStats(context); // Sauvegarde avant d'afficher
+		const total = formatTime(stats.totalTime);
+		const session = formatTime(Date.now() - stats.startTime); // Temps de session
+		const statsMessage = `
+		🎉 **Your VS Code Wrapped Stats** 🎉
+		- Keys Pressed: ${stats.keysPressed}
+		- Files Created: ${stats.filesCreated}
+		- Files Deleted: ${stats.filesDeleted}
+		- Total Time: ${total.hours} hours ${total.minutes} minutes ${total.seconds} seconds
+		- Session Time: ${session.hours} hours ${session.minutes} minutes ${session.seconds} seconds
+		`;
+		vscode.window.showInformationMessage(statsMessage);
+	});
+
+	// Commande pour réinitialiser les statistiques
+	const resetStats = vscode.commands.registerCommand('vscode-wrapped.reset', function () {
+		context.globalState.update('vscodeWrappedStats', undefined);
+		vscode.window.showInformationMessage('Statistics have been reset!');
+		loadStats(context);
+	});
+
+	// Ajouter les abonnements
+	context.subscriptions.push(showStats, keyPressListener, fileCreateListener, fileDeleteListener, resetStats);
+}
+
+function formatTime(ms) {
+	// Conversion des millisecondes en jours, heures, minutes, secondes
+	const msPerSecond = 1000;
+	const msPerMinute = msPerSecond * 60;
+	const msPerHour = msPerMinute * 60;
+	const msPerDay = msPerHour * 24;
+
+	const days = Math.floor(ms / msPerDay);
+	ms %= msPerDay;
+
+	const hours = Math.floor(ms / msPerHour);
+	ms %= msPerHour;
+
+	const minutes = Math.floor(ms / msPerMinute);
+	ms %= msPerMinute;
+
+	const seconds = Math.floor(ms / msPerSecond);
+
+	return {
+		days,
+		hours,
+		minutes,
+		seconds,
+	};
+}
+
+function deactivate() {
+	saveStats(); // Sauvegarde les statistiques lorsque l'extension est désactivée
+}
 
 module.exports = {
 	activate,
-	deactivate
-}
+	deactivate,
+};
