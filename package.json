@@ -1,6 +1,6 @@
 {
   "name": "vscode-wrapped",
-  "displayName": "vscode-wrapped",
+  "displayName": "vscode wrapped",
   "description": "Collecte des statistiques sur votre utilisation de VS Code et génère un rapport annuel.",
   "version": "0.0.1",
   "engines": {
@@ -13,13 +13,14 @@
   "onCommand:wrapped.showStats",
   "onStartupFinished"
   ],
+  "icon": "./image/icon.png",
   "main": "./extension.js",
   "contributes": {
     "commands": [
       {"command": "vscode-wrapped.showStats",
       "title": "showStats"},
       {"command": "vscode-wrapped.reset",
-      "title": "resteStat"}
+      "title": "resetStat"}
     ]
   },
   "scripts": {
