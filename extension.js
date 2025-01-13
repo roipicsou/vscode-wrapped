@@ -1,30 +1,34 @@
 const vscode = require('vscode');
 
+// Stats initialisées
 let stats = {
 	keysPressed: 0,
 	filesCreated: 0,
 	filesDeleted: 0,
-	totalTime: 0, // Temps total depuis le dernier reset
-	startTime: Date.now(), // Début de la session actuelle
+	totalTime: 0,
+	startTime: Date.now(),
+	startTime2 : Date.now()
 };
 
+// Fonction pour sauvegarder les statistiques
 function saveStats(context) {
-	// Mettre à jour le temps total accumulé
-	stats.totalTime += Date.now() - stats.startTime;
-	// Sauvegarder dans globalState
-	context.globalState.update('vscodeWrappedStats', {
-		keysPressed: stats.keysPressed,
-		filesCreated: stats.filesCreated,
-		filesDeleted: stats.filesDeleted,
-		totalTime: stats.totalTime,
-	});
+	if (!context || !context.globalState) {
+		console.error('Context or globalState is undefined.');
+		return;
+	}
+	stats.totalTime += Date.now() - stats.startTime2;
+	stats.startTime2 = Date.now();
+	context.globalState.update('vscodeWrappedStats', stats);
+	console.log('Stats saved:', stats);
 }
 
+// Fonction pour charger les statistiques depuis le stockage
 function loadStats(context) {
 	const savedStats = context.globalState.get('vscodeWrappedStats');
 	if (savedStats) {
 		stats = { ...savedStats };
-		stats.startTime = Date.now(); // Réinitialiser le début de la session actuelle
+		stats.startTime = Date.now(); // Réinitialise le début de la session actuelle
+		console.log('Stats loaded:', stats);
 	} else {
 		stats = {
 			keysPressed: 0,
@@ -32,29 +36,74 @@ function loadStats(context) {
 			filesDeleted: 0,
 			totalTime: 0,
 			startTime: Date.now(),
+			startTime2 : Date.now()
 		};
+		console.log('No saved stats found. Initialized new stats:', stats);
 	}
 }
 
+// Fournisseur de données pour la Tree View
+class WrappedTreeDataProvider {
+	constructor(context) {
+		this._onDidChangeTreeData = new vscode.EventEmitter();
+		this.onDidChangeTreeData = this._onDidChangeTreeData.event;
+		this.context = context;
+	}
+
+	refresh() {
+		this._onDidChangeTreeData.fire(); // Rafraîchit la vue
+	}
+
+	getTreeItem(element) {
+		return element;
+	}
+
+	getChildren() {
+		saveStats(this.context); // Sauvegarde les stats avant de générer les enfants
+		const totalTime = formatTime(stats.totalTime);
+
+		return [
+			new vscode.TreeItem(`Keys Pressed: ${stats.keysPressed}`, vscode.TreeItemCollapsibleState.None),
+			new vscode.TreeItem(`Files Created: ${stats.filesCreated}`, vscode.TreeItemCollapsibleState.None),
+			new vscode.TreeItem(`Files Deleted: ${stats.filesDeleted}`, vscode.TreeItemCollapsibleState.None),
+			new vscode.TreeItem(
+				`Total Time: ${totalTime.hours}h ${totalTime.minutes}m ${totalTime.seconds}s`,
+				vscode.TreeItemCollapsibleState.None
+			),
+		];
+	}
+}
+
+// Fonction appelée à l'activation de l'extension
 function activate(context) {
+	console.log('VSCode Wrapped activated!');
 	loadStats(context);
+
+	// Initialisation du TreeDataProvider
+	const treeDataProvider = new WrappedTreeDataProvider(context);
+	vscode.window.createTreeView('vscodeWrappedTreeView', {
+		treeDataProvider,
+	});
 
 	// Listener pour les pressions de touches
 	const keyPressListener = vscode.workspace.onDidChangeTextDocument(() => {
 		stats.keysPressed++;
 		saveStats(context);
+		treeDataProvider.refresh();
 	});
 
 	// Listener pour la création de fichiers
 	const fileCreateListener = vscode.workspace.onDidCreateFiles((event) => {
 		stats.filesCreated += event.files.length;
 		saveStats(context);
+		treeDataProvider.refresh();
 	});
 
 	// Listener pour la suppression de fichiers
 	const fileDeleteListener = vscode.workspace.onDidDeleteFiles((event) => {
 		stats.filesDeleted += event.files.length;
 		saveStats(context);
+		treeDataProvider.refresh();
 	});
 
 	// Commande pour afficher les statistiques
@@ -78,21 +127,31 @@ function activate(context) {
 		context.globalState.update('vscodeWrappedStats', undefined);
 		vscode.window.showInformationMessage('Statistics have been reset!');
 		loadStats(context);
+		treeDataProvider.refresh();
+	});
+
+	// Commande pour rafraîchir la Tree View
+	const refreshTreeView = vscode.commands.registerCommand('vscode-wrapped.refreshTree', function () {
+		treeDataProvider.refresh();
+		vscode.window.showInformationMessage('Tree View refreshed!');
 	});
 
 	// Ajouter les abonnements
-	context.subscriptions.push(showStats, keyPressListener, fileCreateListener, fileDeleteListener, resetStats);
+	context.subscriptions.push(
+		showStats,
+		keyPressListener,
+		fileCreateListener,
+		fileDeleteListener,
+		resetStats,
+		refreshTreeView
+	);
 }
 
+// Fonction pour formater le temps en heures, minutes, secondes
 function formatTime(ms) {
-	// Conversion des millisecondes en jours, heures, minutes, secondes
 	const msPerSecond = 1000;
 	const msPerMinute = msPerSecond * 60;
 	const msPerHour = msPerMinute * 60;
-	const msPerDay = msPerHour * 24;
-
-	const days = Math.floor(ms / msPerDay);
-	ms %= msPerDay;
 
 	const hours = Math.floor(ms / msPerHour);
 	ms %= msPerHour;
@@ -103,17 +162,18 @@ function formatTime(ms) {
 	const seconds = Math.floor(ms / msPerSecond);
 
 	return {
-		days,
 		hours,
 		minutes,
 		seconds,
 	};
 }
 
+// Fonction appelée à la désactivation de l'extension
 function deactivate() {
-	saveStats(); // Sauvegarde les statistiques lorsque l'extension est désactivée
+	console.log('VSCode Wrapped deactivated!');
 }
 
+// Export des fonctions d'activation et de désactivation
 module.exports = {
 	activate,
 	deactivate,

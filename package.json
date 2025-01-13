@@ -15,14 +15,30 @@
   ],
   "icon": "./image/icon.png",
   "main": "./extension.js",
-  "contributes": {
-    "commands": [
-      {"command": "vscode-wrapped.showStats",
-      "title": "showStats"},
-      {"command": "vscode-wrapped.reset",
-      "title": "resetStat"}
+"contributes": {
+  "views": {
+    "explorer": [
+      {
+        "id": "vscodeWrappedTreeView",
+        "name": "VSCode Wrapped"
+      }
     ]
   },
+  "commands": [
+    {
+      "command": "vscode-wrapped.showStats",
+      "title": "Show VSCode Wrapped Stats"
+    },
+    {
+      "command": "vscode-wrapped.reset",
+      "title": "Reset VSCode Wrapped Stats"
+    },
+    {
+      "command": "vscode-wrapped.refreshTree",
+      "title": "Refresh VSCode Wrapped Tree View"
+    }
+  ]
+},
   "scripts": {
     "lint": "eslint .",
     "pretest": "npm run lint",
