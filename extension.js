@@ -62,7 +62,7 @@ class WrappedTreeDataProvider {
 	getChildren() {
 		saveStats(this.context); // Sauvegarde les stats avant de générer les enfants
 		const day = new Date();
-		if (day.getMonth() == 0) {
+		if (day.getMonth() == 11 && day.getUTCDay() > 14) {
 			const totalTime = formatTime(stats.totalTime);
 
 			return [
@@ -74,6 +74,10 @@ class WrappedTreeDataProvider {
 					vscode.TreeItemCollapsibleState.None
 				),
 			];
+		} else {
+			return [
+				new vscode.TreeItem(`la date n'est pas atint`)
+			]
 		}
 	}
 }
