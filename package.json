@@ -2,7 +2,7 @@
   "name": "vscode-wrapped",
   "displayName": "vscode wrapped",
   "description": "Collecte des statistiques sur votre utilisation de VS Code et génère un rapport annuel.",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.96.0"
   },
