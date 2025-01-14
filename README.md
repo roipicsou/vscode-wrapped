@@ -1,65 +1,37 @@
-# vscode-wrapped README
+# Statistiques VS Code Wrapped
 
-This is the README for your extension "vscode-wrapped". After writing up a brief description, we recommend including the following sections.
+Suivez vos statistiques de productivité directement dans VS Code !
 
-## Features
+## Fonctionnalités
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+- Compte les touches pressées, les fichiers créés et les fichiers supprimés.
+- Suit le temps total passé dans VS Code depuis le dernier réinitialisation.
+- Affiche les statistiques dans une vue arborescente (Tree View) pour une visualisation facile.
 
-For example if there is an image subfolder under your extension project workspace:
+## Commandes
 
-\!\[feature X\]\(images/feature-x.png\)
+- **Afficher les Statistiques** : Affiche les statistiques actuelles, notamment le nombre de touches pressées, les fichiers créés/supprimés, le temps total et le temps de la session en cours.
+- **Réinitialiser** : Réinitialise toutes les statistiques à zéro.
+- **Rafraîchir la Vue** : Met à jour la vue arborescente pour refléter les nouvelles statistiques.
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+## Installation
 
-## Requirements
+1. Clonez le dépôt ou téléchargez le fichier ZIP.
+2. Ouvrez le projet dans VS Code.
+3. Installez les dépendances avec `npm install`.
+4. Appuyez sur `F5` pour lancer le débogage de l'extension.
+5. Utilisez les commandes disponibles pour interagir avec les statistiques.
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+## Utilisation
 
-## Extension Settings
+- Utilisez `Ctrl+Shift+P` (ou `Cmd+Shift+P` sur macOS) pour ouvrir la palette de commandes.
+- Tapez `VSCode Wrapped Stats` pour afficher les commandes disponibles.
+- Sélectionnez les commandes pour afficher, réinitialiser ou rafraîchir les statistiques.
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+## Contribution
 
-For example:
+N'hésitez pas à forker le dépôt, à signaler des problèmes ou à contribuer au développement !
 
-This extension contributes the following settings:
+## Licence
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+Ce projet est sous licence [MIT License](https://github.com/roipicsou/vscode-wrapped/).

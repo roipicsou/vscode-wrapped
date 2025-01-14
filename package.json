@@ -9,6 +9,10 @@
   "categories": [
     "Other"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/roipicsou/vscode-wrapped"
+  },
   "activationEvents": [
   "onCommand:wrapped.showStats",
   "onStartupFinished"

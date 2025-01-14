@@ -27,7 +27,8 @@ function loadStats(context) {
 	const savedStats = context.globalState.get('vscodeWrappedStats');
 	if (savedStats) {
 		stats = { ...savedStats };
-		stats.startTime = Date.now(); // Réinitialise le début de la session actuelle
+		stats.startTime = Date.now();
+		stats.startTime2 = Date.now();
 		console.log('Stats loaded:', stats);
 	} else {
 		stats = {
@@ -60,17 +61,20 @@ class WrappedTreeDataProvider {
 
 	getChildren() {
 		saveStats(this.context); // Sauvegarde les stats avant de générer les enfants
-		const totalTime = formatTime(stats.totalTime);
+		const day = new Date();
+		if (day.getMonth() == 0) {
+			const totalTime = formatTime(stats.totalTime);
 
-		return [
-			new vscode.TreeItem(`Keys Pressed: ${stats.keysPressed}`, vscode.TreeItemCollapsibleState.None),
-			new vscode.TreeItem(`Files Created: ${stats.filesCreated}`, vscode.TreeItemCollapsibleState.None),
-			new vscode.TreeItem(`Files Deleted: ${stats.filesDeleted}`, vscode.TreeItemCollapsibleState.None),
-			new vscode.TreeItem(
-				`Total Time: ${totalTime.hours}h ${totalTime.minutes}m ${totalTime.seconds}s`,
-				vscode.TreeItemCollapsibleState.None
-			),
-		];
+			return [
+				new vscode.TreeItem(`Keys Pressed: ${stats.keysPressed}`, vscode.TreeItemCollapsibleState.None),
+				new vscode.TreeItem(`Files Created: ${stats.filesCreated}`, vscode.TreeItemCollapsibleState.None),
+				new vscode.TreeItem(`Files Deleted: ${stats.filesDeleted}`, vscode.TreeItemCollapsibleState.None),
+				new vscode.TreeItem(
+					`Total Time: ${totalTime.hours}h ${totalTime.minutes}m ${totalTime.seconds}s`,
+					vscode.TreeItemCollapsibleState.None
+				),
+			];
+		}
 	}
 }
 
